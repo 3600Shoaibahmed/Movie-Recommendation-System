@@ -1,0 +1,34 @@
+I want to build a project called **Meeting Notes Summarizer**.
+
+Requirements:
+1. Use **Python only**.
+2. Use **FastAPI** as backend API:
+   - Endpoint `/summarize` should accept a transcript file upload (TXT).
+   - Process the transcript using Hugging Face Transformers (BART or T5) for **summarization**.
+   - Extract **action items** (sentences with words like "will", "must", "assign", "todo", "action").
+   - Perform **sentiment analysis** using NLTK VADER or Hugging Face sentiment model.
+   - Return JSON with `{ summary, actionItems, sentiment }`.
+
+3. Use **Streamlit** for the frontend UI:
+   - Allow user to upload a transcript file.
+   - Send it to the FastAPI backend.
+   - Display:
+     - The summary (nicely formatted).
+     - Action items (as a checklist or bullet list).
+     - Sentiment (positive/negative/neutral + score).
+
+4. Project Structure:meeting-notes-summarizer/ │── backend/ │   ├── main.py          # FastAPI app │   └── services/ │       └── summarizer.py │ │── frontend/ │   └── app.py           # Streamlit app
+
+
+5. Provide working code examples for:
+   - `backend/main.py` (FastAPI server)
+   - `backend/services/summarizer.py` (logic for summarization, sentiment, action items)
+   - `frontend/app.py` (Streamlit UI)
+
+6. Make sure backend runs with:
+   `uvicorn main:app --reload --port 8000`
+
+   And frontend runs with:
+   `streamlit run app.py`
+
+Please generate the complete implementation.

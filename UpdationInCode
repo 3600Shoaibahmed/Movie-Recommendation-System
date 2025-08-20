@@ -1,0 +1,73 @@
+summarizes.py
+def extract_decisions(text):
+    """
+    Extracts key decisions from the transcript.
+    Looks for patterns like 'decided', 'approved', 'concluded'.
+    """
+    decision_keywords = ["decided", "approved", "concluded", "agreed", "finalized"]
+    sentences = re.split(r'(?<=[.!?]) +', text)
+    decisions = [s for s in sentences if any(word in s.lower() for word in decision_keywords)]
+    return decisions
+
+def extract_action_items(text):
+    """
+    Smarter action item extraction.
+    Includes owner (if name mentioned) and task.
+    """
+    action_keywords = ["will", "must", "should", "assign", "todo", "action"]
+    sentences = re.split(r'(?<=[.!?]) +', text)
+
+    action_items = []
+    for s in sentences:
+        if any(word in s.lower() for word in action_keywords):
+            # Try to find owner (simple heuristic: first word before "will/must/should")
+            owner = None
+            for word in ["will", "must", "should"]:
+                if word in s.lower():
+                    parts = s.split(word, 1)
+                    if len(parts[0].strip().split()) > 0:
+                        owner = parts[0].strip().split()[-1]  # last word before the keyword
+            action_items.append({"task": s.strip(), "owner": owner})
+    return action_items
+
+def process_transcript(text):
+    summary = summarize_text(text)
+    action_items = extract_action_items(text)
+    sentiment = analyze_sentiment(text)
+    decisions = extract_decisions(text)
+
+    return {
+        "summary": summary,
+        "action_items": action_items,
+        "sentiment": sentiment,
+        "decisions": decisions
+    }
+
+app.py
+
+
+
+if response.status_code == 200:
+    data = response.json()
+
+    # Summary
+    st.subheader("📝 Summary")
+    st.write(data["summary"])
+
+    # Action Items
+    st.subheader("✅ Action Items")
+    for item in data["action_items"]:
+        st.markdown(f"- **Task:** {item['task']}  \n **Owner:** {item['owner'] if item['owner'] else 'Unassigned'}")
+
+    # Decisions
+    st.subheader("📌 Decisions")
+    if data["decisions"]:
+        for d in data["decisions"]:
+            st.markdown(f"- {d}")
+    else:
+        st.write("No major decisions detected.")
+
+    # Sentiment
+    st.subheader("📊 Sentiment Analysis")
+    sentiment = data["sentiment"]
+    st.write(f"**Sentiment:** {sentiment['sentiment'].capitalize()} (score: {sentiment['score']})")

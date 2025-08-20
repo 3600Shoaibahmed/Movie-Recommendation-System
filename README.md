@@ -1,33 +1,24 @@
-# 📌 Image Caption Generator with Streamlit + BLIP
-
-import streamlit as st
-from transformers import BlipProcessor, BlipForConditionalGeneration
-from PIL import Image
-import torch
-
-# Load model + processor
-@st.cache_resource  # cache so model loads only once
-def load_model():
-    processor = BlipProcessor.from_pretrained("Salesforce/blip-image-captioning-base")
-    model = BlipForConditionalGeneration.from_pretrained("Salesforce/blip-image-captioning-base")
-    return processor, model
-
-processor, model = load_model()
-
-st.title("📸 Image Caption Generator")
-st.write("Upload an image and get an AI-generated caption!")
-
-# File uploader
-uploaded_file = st.file_uploader("Choose an image...", type=["jpg", "jpeg", "png"])
-
-if uploaded_file is not None:
-    # Display the uploaded image
-    image = Image.open(uploaded_file).convert("RGB")
-    st.image(image, caption="Uploaded Image", use_column_width=True)
-
-    # Generate caption button
-    if st.button("Generate Caption"):
-        inputs = processor(images=image, return_tensors="pt")
-        output = model.generate(**inputs, max_new_tokens=30)
-        caption = processor.decode(output[0], skip_special_tokens=True)
-        st.success(f"📝 Caption: {caption}")
+# GitHub Copilot, extend my project with these new features:
+# 1. Add a Decision Tracker:
+#    - Extract sentences from the transcript that mention decisions.
+#    - Look for keywords like "decided", "approved", "agreed", "finalized", "concluded".
+#    - Return them as a list of decisions.
+#
+# 2. Improve Action Items:
+#    - Detect sentences with action words like "will", "must", "should", "assign".
+#    - Try to capture the **owner** of the task (the name before the keyword).
+#    - Return action items as a list of dictionaries with "task" and "owner".
+#
+# 3. Modify `summarizer.py`:
+#    - Implement `extract_decisions()` and a smarter `extract_action_items()`.
+#    - Update `process_transcript()` to include `decisions` in the response JSON.
+#
+# 4. Update `main.py`:
+#    - Ensure the `/summarize` API endpoint now also returns "decisions".
+#
+# 5. Update `frontend/app.py` (Streamlit):
+#    - Display decisions under a 📌 "Decisions" section.
+#    - Display action items with both "task" and "owner".
+#    - If no decisions are found, show "No major decisions detected."
+#
+# Goal: After upload of transcript, UI should show summary, smarter action items, decisions, and sentiment.

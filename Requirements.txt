@@ -1,0 +1,63 @@
+# --- 1. Imports ---
+import torch
+import torch.nn as nn
+import pandas as pd
+import random
+import matplotlib.pyplot as plt
+
+# --- 2. Load dataset ---
+data = pd.read_csv("dataset/obituaries_sample.csv")
+texts = data["text"].tolist()
+print("Dataset size:", len(texts))
+
+# --- 3. Load trained SimCSE encoder ---
+class DummyEncoder(nn.Module):
+    def __init__(self, vocab_size=1000, hidden_dim=64):
+        super().__init__()
+        self.embedding = nn.Embedding(vocab_size, hidden_dim)
+
+    def forward(self, x):
+        return self.embedding(x).mean(dim=1)
+
+encoder = DummyEncoder()
+encoder.load_state_dict(torch.load("dummy_encoder.pt"))
+encoder.eval()
+
+print("Model loaded successfully!")
+
+# --- 4. Encode sentences ---
+# For simplicity, fake tokenization: map each word to its index in vocab
+vocab = {w: i for i, w in enumerate(set(" ".join(texts).split()))}
+
+def encode_sentence(sentence):
+    ids = torch.tensor([vocab.get(w, 0) for w in sentence.split()])
+    with torch.no_grad():
+        return encoder(ids.unsqueeze(0)).squeeze(0).numpy()
+
+embeddings = [encode_sentence(s) for s in texts]
+
+print("Generated embeddings shape:", len(embeddings), len(embeddings[0]))
+
+# --- 5. Active learning simulation ---
+unlabeled = list(range(len(texts)))
+labeled = []
+performance = []
+
+# Fake "model accuracy" for demo (improves as more samples labeled)
+for step in range(1, len(texts) + 1):
+    query = random.choice(unlabeled)   # <-- replace with uncertainty sampling later
+    unlabeled.remove(query)
+    labeled.append(query)
+
+    # Fake performance curve
+    acc = len(labeled) / len(texts) * 100
+    performance.append(acc)
+    print(f"Step {step}: Selected '{texts[query]}' -> Accuracy {acc:.2f}%")
+
+# --- 6. Plot learning curve ---
+plt.plot(range(1, len(performance)+1), performance, marker='o')
+plt.xlabel("Active Learning Steps")
+plt.ylabel("Model Accuracy (simulated %)")
+plt.title("Active Learning Performance Curve")
+plt.grid(True)
+plt.show()
